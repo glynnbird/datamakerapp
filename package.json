@@ -1,0 +1,29 @@
+{
+  "name": "datamakerapp",
+  "description": "CouchDB data genertion app",
+  "version": "1.1.0",
+  "productName": "DatamakerApp",
+  "author": "Glynn Bird <glynn.bird@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "electron app/main.js",
+    "mac": "build --mac",
+    "linux": "build --linux",
+    "win": "build --win",
+    "clean": "rm -rf dist",
+    "postinstall": "install-app-deps"
+  },
+  "build": {
+    "productName": "DatamakerApp",
+    "appId": "com.glynnbird.datamakerapp",
+    "mac": {
+      "category": "Utility"
+    },
+    "win": {}
+  },
+  "devDependencies": {
+    "electron": "^6.0.7",
+    "electron-builder": "^21.2.0",
+    "electron-packager": "^14.0.5"
+  }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DatamakerApp</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://kit.fontawesome.com/324c8423f7.js"></script>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand">DatamakerApp</a>
+      <form class="form-inline">
+        <button class="btn" type="button" v-on:click="settingsClick"><i class="fas fa-cog"></i></button>
+      </form>
+    </nav>
+    
+    <div class="container-fluid">
+
+      <!-- jumbotron -->
+      <div class="jumbotron" v-if="step === 0">
+        <h1 class="display-4">DatamakerApp</h1>
+        <p class="lead">Create bulk sample data for your Cloudant or CouchDB database.</p>
+        <hr class="my-4">
+        <a class="btn btn-primary btn-lg" href="#" role="button" v-on:click="getStartedClicked">Get Started</a>
+      </div>
+
+      <div class="container call_to_action" v-if="step > 0">
+        <div class="row bs-wizard" style="border-bottom:0">
+          <div class="col-xs-3 bs-wizard-step" v-bind:class="{active: (step===1), complete: (step>1)}">
+            <div class="text-center bs-wizard-stepnum">Step 1</div>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <a href="#" v-on:click="step=Math.min(step,1)" class="bs-wizard-dot"></a>
+            <div class="bs-wizard-info text-center">Choose Data Type</div>
+          </div>
+      
+          <div class="col-xs-3 bs-wizard-step" v-bind:class="{active: (step===2), disabled: (step<2), complete: (step>2)}">
+            <div class="text-center bs-wizard-stepnum">Step 2</div>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <a href="#" v-on:click="step=Math.min(step,2)" class="bs-wizard-dot"></a>
+            <div class="bs-wizard-info text-center">Configure DataMaker</div>
+          </div>
+      
+          <div class="col-xs-3 bs-wizard-step" v-bind:class="{active: (step===3), disabled: (step<3), complete: (step>3)}">
+            <div class="text-center bs-wizard-stepnum">Step 3</div>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <a href="#" v-on:click="step=Math.min(step,3)" class="bs-wizard-dot"></a>
+            <div class="bs-wizard-info text-center">Make!</div>
+          </div>
+      
+          <div class="col-xs bs-wizard-step" v-bind:class="{active: (step===4), disabled: (step<4), complete: (step===4)}">
+            <div class="text-center bs-wizard-stepnum">Step 4</div>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <a href="#" class="bs-wizard-dot"></a>
+            <div class="bs-wizard-info text-center">Done</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- settings panel -->
+      <div class="alert alert-secondary" role="alert" v-if="settingsPanel">
+        <h2>Settings</h2>
+        <div>Enter the URL of your CouchDB/Cloudant service.</div>
+        <form>
+          <div class="form-group">
+            <label for="settingsURL">URL</label>
+            <input v-model="settings.couchURL" type="email" class="form-control" id="settingsURL" placeholder="e.g. https//username:password@myhostname.com">
+          </div>
+          <div class="form-group">
+            <label for="settingsAPIKey">IAM API Key (IBM IAM only)</label>
+            <input v-model="settings.iamAPIKey" type="text" class="form-control" id="settingsAPIKey" aria-describedby="settingsAPIKeyHelp"  placeholder="">
+            <small id="settingsAPIKeyHelp" class="form-text text-muted">If you are using IAM with IBM Cloudant, then enter you API key here.</small>
+          </div>
+          <button type="button" class="btn btn-primary" v-on:click="settingsSubmitClicked">Submit</button>
+        </form>
+      </div>
+
+      <!-- List of object types -->
+      <div class="container" v-if="step === 1">
+        <div class="row" v-for="dataTypes in chunkedDataTypes">
+          <div class="col3" v-for="dt in dataTypes">
+            <div class="card-body border">
+              <!--<img v-bind:src="dt.image" class="card-img-top img-responsive">-->
+              <h5 class="card-title"><i class="fas" v-bind:class="dt.icon"></i> {{ dt.name }}</h5>
+              <p class="card-text">{{ dt.description }} </p>
+              <pre class="code">{{ JSON.stringify(dt.example, null, 2) }}</pre>
+              <a href="#" class="btn btn-primary" v-on:click="chooseClicked(dt)">Choose {{ dt.name }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- start panel -->
+      <div class="alert alert-success" v-if="step > 1">
+        <!-- chosen data type -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title"><i class="fas" v-bind:class="chosenDataType.icon"></i> {{ chosenDataType.name }}</h5>
+          </div>
+        </div>
+
+        <!-- tempalte -->
+        <div class="container" v-if="step === 2">
+          <div class="row">
+            <div class="col">
+              <h5>Template</h5>
+              <textarea class="form-control template" v-bind:class="{ invalidjson: !validJSON }" rows="10" v-model="chosenDataType.datamaker"></textarea>
+              <a href="https://www.npmjs.com/package/datamaker#tag-reference" v-on:click="shell.openExternal('https://www.npmjs.com/package/datamaker#tag-reference')" target="_new">DataMaker tag reference</a>
+            </div>
+            <div class="col">
+              <h5>Example</h5>
+              <pre class="template">{{ exampleStr }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- number of documents -->
+        <div class="form-group">
+          <label for="settingsNumRecords">Number of Documents</label>
+          <input v-bind:disabled="generating" v-model="settings.numRecords" type="number" class="form-control" id="settingsNumRecords">
+        </div>
+
+        <!-- target database -->
+        <div class="form-group">
+          <label for="settingsTargetDatabase">Target Database</label>
+          <input v-bind:disabled="generating" v-model="settings.targetDatabase" type="text" class="form-control" id="settingsTargetDatabase">
+        </div>
+         
+        <!-- generate button -->
+        <button v-if="step === 2"  v-bind:disabled="!validJSON" href="#" class="btn btn-success" v-on:click="generateClicked">Generate data</button>
+        
+        <!-- progress bar -->
+        <div class="progress" v-if="generating">
+          <div class="progress-bar" role="progressbar" v-bind:style="{ width: progress + '%' }" v-bind:aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <!-- complete -->
+        <div v-if="step === 4">
+          <h5>Complete</h5>
+          <hr class="my-4">
+          <a class="btn btn-primary btn-lg" href="#" role="button" v-on:click="getStartedClicked">Start Again</a>
+        </div>
+      </div> 
+
+    </div> 
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
