@@ -266,23 +266,22 @@ var app = new Vue({
       }
     },
     settingsSubmitClicked: function() {
-      console.log(this.settings.couchURL)
-      console.log(this.settings.iamAPIKey)
       store.set('couchURL', this.settings.couchURL)
-      store.set('iamAPIKey', this.settings.iamAPIKey)
+      if (this.settings.iamAPIKey) {
+        store.set('iamAPIKey', this.settings.iamAPIKey)
+      } else {
+        store.delete('iamAPIKey')
+      }
       this.settingsPanel = false
       this.step = 1
     },
     chooseClicked: async function(dt) {
-      console.log(dt)
       this.chosenDataType = dt
       this.exampleStr = await generateExample(this.chosenDataType.datamaker)
-      console.log(this.chosenDataType)
       this.settings.targetDatabase = this.chosenDataType.target
       this.step = 2
     },
     generateClicked: async function() {
-      console.log('generate start!')
       this.step = 3
 
       // cloudant lib
@@ -312,24 +311,19 @@ var app = new Vue({
       async.doUntil(async () => {
         return new Promise((resolve, reject) => {
           const iterations = Math.min(targetCount - count, 500)
-          console.log('iterating', iterations)
           count += iterations
           const records = []
           datamaker.generate(template, format, iterations)
             .on('data', (d) => { records.push(JSON.parse(d)) })
             .on('end', async (d) => { 
-              console.log(records.length)
               const response = await db.bulk({docs:records})
               this.progress = 100 * count/targetCount
-              console.log(response)
               resolve()
             })
         })
       }, async () => {
-        console.log(count, targetCount, (count >= targetCount))
         return (count >= targetCount)
       }, function() {
-        console.log('done')
         self.step = 4
         self.generating = false
       })

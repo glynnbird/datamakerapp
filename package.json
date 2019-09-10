@@ -11,7 +11,7 @@
     "linux": "build --linux",
     "win": "build --win",
     "clean": "rm -rf dist",
-    "postinstall": "install-app-deps"
+    "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "productName": "DatamakerApp",
