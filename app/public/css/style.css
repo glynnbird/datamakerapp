@@ -26,9 +26,14 @@
 .template {
   font-family: "Courier New", Courier, monospace;
   height: 250px;
+  width: 500px;
+  font-size: 12px;
 }
 
-
+.templatecol {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
 /* progress stepper */
 .step_success { font-size:30px }
 

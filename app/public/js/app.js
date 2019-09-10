@@ -217,6 +217,7 @@ var app = new Vue({
     chosen: -1,
     generating: false,
     progress: 0,
+    writeerror: null,
     settings: {
       couchURL: '',
       iamAPIKey: '',
@@ -302,6 +303,7 @@ var app = new Vue({
 
 
       const self = this
+      this.writeerror = null
       this.generating = true
       this.progress = 0
       const template = this.chosenDataType.datamaker
@@ -316,13 +318,17 @@ var app = new Vue({
           datamaker.generate(template, format, iterations)
             .on('data', (d) => { records.push(JSON.parse(d)) })
             .on('end', async (d) => { 
-              const response = await db.bulk({docs:records})
+              try {
+                await db.bulk({docs:records})
+              } catch(e) {
+                self.writeerror = e
+              }
               this.progress = 100 * count/targetCount
               resolve()
             })
         })
       }, async () => {
-        return (count >= targetCount)
+        return (count >= targetCount || self.writeerror)
       }, function() {
         self.step = 4
         self.generating = false
