@@ -24,6 +24,45 @@
       <div class="jumbotron" v-if="step === 0">
         <h1 class="display-4">DatamakerApp</h1>
         <p class="lead">Create bulk sample data for your Cloudant or CouchDB database.</p>
+        <p>
+          <div class="container">
+            <div class="row rowjumbo">
+              <div class="col colc">
+                  <i class="fas fa-code fa-5x"></i>
+              </div>
+              <div class="col colc">
+                  <br>
+                  <i class="fas fa-arrow-right fa-3x"></i>
+              </div>
+              <div class="col colc">
+                  <i class="fas fa-industry fa-5x"></i>
+              </div>
+              <div class="col colc">
+                  <br>
+                  <i class="fas fa-arrow-right fa-3x"></i>
+              </div>
+              <div class="col colc">
+                  <i class="fas fa-database fa-5x"></i>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                Pick from a set of templates (users, products, events, stores, orders) or build 
+                your own template from JSON and <i>DataMaker</i> placeholder tags.
+              </div>
+              <div class="col"></div>
+              <div class="col">
+                DataMaker then uses the template to generate as many JSON documents as you need
+                with realistic data (names, addresses, emails, urls, prices etc).
+              </div>
+              <div class="col"></div>
+              <div class="col">
+                The generated data is written in bulk to your Apache CouchDB or IBM Cloudant 
+                database service with you having to write a line of code.
+              </div>
+            </div>
+          </div>
+        </p>
         <hr class="my-4">
         <a class="btn btn-primary btn-lg" href="#" role="button" v-on:click="getStartedClicked">Get Started</a>
       </div>
